@@ -33,10 +33,10 @@ public class Generator{
         this.createConnectPanel();
     }
 
-    private void connectDatabase(String url,String username,String password){
+    private void connectDatabase(String url,String username,String password,String driverClass){
         try {
             // 加载并注册JDBC驱动类
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Class.forName(driverClass);
             // 建立数据库连接
             this.connection = DriverManager.getConnection(url, username, password);
 
@@ -47,6 +47,7 @@ public class Generator{
             profile.setUrl(url);
             profile.setUsername(username);
             profile.setPassword(password);
+            profile.setDriverClass(driverClass);
             this.setProfile(profile);
             System.out.println("connectSuccess");
             this.createSelectPanel();
@@ -64,19 +65,17 @@ public class Generator{
         contentDiv.setAlignItems(AlignItems.CENTER);
         LhTable lhTable=new LhTable(10);
         //lhTable.setBorder(2,Color.black);
+
         LhRow row1=lhTable.addRow();
         LhLabel url=new LhLabel("url:");
         row1.addComponent(url);
-
-        // 文本框组件
         LhInput urlInput=new LhInput();
-        urlInput.setText("jdbc:mysql://localhost:3306/database_name");
+        urlInput.setText("jdbc:mysql://localhost:3306/database_name?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai");
         row1.addComponent(urlInput);
 
         LhRow row2=lhTable.addRow();
         LhLabel username=new LhLabel("username:");
         row2.addComponent(username);
-
         LhInput usernameInput=new LhInput();
         usernameInput.setText("root");
         row2.addComponent(usernameInput);
@@ -84,15 +83,22 @@ public class Generator{
         LhRow row3=lhTable.addRow();
         LhLabel password=new LhLabel("password:");
         row3.addComponent(password);
-
         LhInput passwordInput=new LhInput();
         row3.addComponent(passwordInput);
+
+        LhRow row4=lhTable.addRow();
+        LhLabel driverClass=new LhLabel("driverClass:");
+        row4.addComponent(driverClass);
+        LhInput driverClassInput=new LhInput();
+        driverClassInput.setText("com.mysql.cj.jdbc.Driver");
+        row4.addComponent(driverClassInput);
 
         this.profile=getProfile();
         if(profile!=null){
             urlInput.setText(profile.getUrl());
             usernameInput.setText(profile.getUsername());
             passwordInput.setText(profile.getPassword());
+            driverClassInput.setText(profile.getDriverClass());
         }else {
             profile=new Profile();
         }
@@ -114,9 +120,13 @@ public class Generator{
                     JOptionPane.showMessageDialog(null,"请输入用户名");
                     return;
                 }
+                if(driverClassInput.getText().equals("")){
+                    JOptionPane.showMessageDialog(null,"请输入数据库驱动");
+                    return;
+                }
                 button.setEnabled(false);
                 button.setText("连接中...");
-                connectDatabase(urlInput.getText(),usernameInput.getText(),passwordInput.getText());
+                connectDatabase(urlInput.getText(),usernameInput.getText(),passwordInput.getText(),driverClassInput.getText());
                 button.setEnabled(true);
                 button.setText("连接数据库");
             }

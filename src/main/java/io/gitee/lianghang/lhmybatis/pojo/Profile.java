@@ -6,6 +6,7 @@ public class Profile implements Serializable {
     private String url;
     private String username;
     private String password;
+    private String driverClass;
     private Project project;
 
     public String getPassword() {
@@ -38,5 +39,13 @@ public class Profile implements Serializable {
 
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    public String getDriverClass() {
+        return driverClass;
+    }
+
+    public void setDriverClass(String driverClass) {
+        this.driverClass = driverClass;
     }
 }
