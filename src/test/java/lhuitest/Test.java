@@ -1,9 +1,9 @@
 package lhuitest;
 
-import io.gitee.lianghang.lhmybatis.Generator;
-import io.gitee.lianghang.lhswing.LhBody;
-import io.gitee.lianghang.lhswing.LhDiv;
-import io.gitee.lianghang.lhswing.LhScrollPane;
+import io.github.lhcyh.lhmybatis.Generator;
+import io.github.lhcyh.lhswing.LhBody;
+import io.github.lhcyh.lhswing.LhDiv;
+import io.github.lhcyh.lhswing.LhScrollPane;
 
 /**
  * @ClassName：Test
