@@ -1,4 +1,4 @@
-package io.github.lhcyh.lhswing.enums;
+package io.github.lhcyh.lhswing;
 
 /**
  * @ClassName：FlexDirection

@@ -1,9 +1,6 @@
 package io.github.lhcyh.lhswing;
 
 import io.github.lhcyh.lhswing.base.PercentPanel;
-import io.github.lhcyh.lhswing.enums.AlignItems;
-import io.github.lhcyh.lhswing.enums.FlexDirection;
-import io.github.lhcyh.lhswing.enums.JustifyContent;
 
 import java.awt.*;
 import java.awt.event.ComponentAdapter;

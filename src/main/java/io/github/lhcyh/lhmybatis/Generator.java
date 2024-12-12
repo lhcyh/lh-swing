@@ -4,9 +4,9 @@ import io.github.lhcyh.lhmybatis.pojo.*;
 import io.github.lhcyh.lhmybatis.utils.MybatisFactory;
 import io.github.lhcyh.lhmybatis.utils.Utils;
 import io.github.lhcyh.lhswing.*;
-import io.github.lhcyh.lhswing.enums.AlignItems;
-import io.github.lhcyh.lhswing.enums.FlexDirection;
-import io.github.lhcyh.lhswing.enums.JustifyContent;
+import io.github.lhcyh.lhswing.AlignItems;
+import io.github.lhcyh.lhswing.FlexDirection;
+import io.github.lhcyh.lhswing.JustifyContent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -732,19 +732,19 @@ public class Generator{
         LhLabel pojo=new LhLabel("生成model的路径");
         right.add(pojo);
         LhInput pojoInput=new LhInput();
-        pojoInput.setText("com.example.project.pojo");
+        pojoInput.setText("com.example.demo.pojo");
         right.add(pojoInput);
 
         LhLabel entity=new LhLabel("生成entity的路径");
         right.add(entity);
         LhInput entityInput=new LhInput();
-        entityInput.setText("com.example.project.entity");
+        entityInput.setText("com.example.demo.entity");
         right.add(entityInput);
 
         LhLabel mapper=new LhLabel("生成mapper接口的路径");
         right.add(mapper);
         LhInput mapperInput=new LhInput();
-        mapperInput.setText("com.example.project.mapper");
+        mapperInput.setText("com.example.demo.mapper");
         right.add(mapperInput);
 
         String pojoPackage=profile.getProject().getPojoPackage();
@@ -772,6 +772,9 @@ public class Generator{
                     JOptionPane.showMessageDialog(null,"请输入生成mapper路径");
                     return;
                 }
+
+                submitButton.setText("加载中...");
+                submitButton.setEnabled(false);
 
                 profile.getProject().setPojoPackage(pojoInput.getText());
                 profile.getProject().setEntityPackage(entityInput.getText());
@@ -803,8 +806,6 @@ public class Generator{
                                 options, // 按钮文本
                                 options[0]); // 默认选中的按钮
 
-                        System.out.println("select");
-
                         // 根据用户的选择执行不同的操作
                         switch (response) {
                             case JOptionPane.NO_OPTION:
@@ -819,13 +820,17 @@ public class Generator{
                                 continue;
                         }
                     }else {
-                        System.out.println("write");
                         writeFile(file,codeFile.getCode());
-                        break;
+                        continue;
                     }
+                    submitButton.setText("提交");
+                    submitButton.setEnabled(true);
                     return;
                 }
-
+                JOptionPane.showMessageDialog(null,"已完成");
+                submitButton.setText("提交");
+                submitButton.setEnabled(true);
+                System.out.println("success!");
             }
         });
     }
