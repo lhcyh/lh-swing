@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.UserMapper">
+    <insert id="addUser" userGeneratedKey="true" keyProperty="id" parameterType="com.example.demo.pojo.User">
+         insert into user(account,password,role) values(#{account},#{password},#{role})
+    </insert>
+    <delete id="deleteUserById">
+         delete from user where id=#{id}
+    </delete>
+    <update id="updateUser" parameterType="com.example.demo.pojo.User">
+        update user
+        <set>
+          <if test="account!=null">
+             account=#{account},
+          </if>
+          <if test="password!=null">
+             password=#{password},
+          </if>
+          <if test="role!=null">
+             role=#{role},
+          </if>
+        </set>
+        where id=#{id}
+    </update>
+
+
+    <select id="getUserById" resultType="com.example.demo.pojo.User" >
+        select * from user where id=#{id}
+    </select>
+
+
+    <sql id="tableFieldMapping">
+       user.${field}
+    </sql>
+
+    <sql id="exampleClause">
+        <where>
+            <foreach collection="orCriterionList" item="criterionList" separator="or">
+                <trim prefix="(" prefixOverrides="and" suffix=")">
+                    <foreach collection="criterionList" item="criterion">
+                        and
+                        <bind name="table" value="criterion.table"/>
+                        <bind name="field" value="criterion.field"/>
+                        <include refid="tableFieldMapping"></include>
+                        <choose>
+                            <when test="criterion.valueType=='noValue'">
+                                ${criterion.condition}
+                            </when>
+                            <when test="criterion.valueType=='singleValue'">
+                                ${criterion.condition} #{criterion.value}
+                            </when>
+                            <when test="criterion.valueType=='betweenValue'">
+                                ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                            </when>
+                        </choose>
+                    </foreach>
+                </trim>
+            </foreach>
+        </where>
+        <if test="orderBy!=null">
+            <bind name="table" value="orderBy.table"/>
+            <bind name="field" value="orderBy.field"/>
+            order by
+            <include refid="tableFieldMapping"></include>
+            ${orderBy.condition}
+        </if>
+        <if test="limitStart!=null">
+            limit #{limitStart}
+            <if test="limitNum!=null">
+                ,#{limitNum}
+            </if>
+        </if>
+    </sql>
+
+    <select id="getUserListByExample" parameterType="Example"  resultType="com.example.demo.pojo.User" >
+        select * from user
+        <include refid="exampleClause"></include>
+    </select>
+
+</mapper>

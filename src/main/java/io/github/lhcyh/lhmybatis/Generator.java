@@ -782,57 +782,79 @@ public class Generator{
 
                 MybatisFactory mybatisFactory=new MybatisFactory(profile.getProject());
                 ProjectCode projectCode=mybatisFactory.getProjectCode();
-                List<CodeFile> codeFileList=projectCode.getPojo();
-                boolean overwrite=false;
-                for(CodeFile codeFile:codeFileList){
-                    //System.out.println(codeFile.getCode());
-                    String currentDir = System.getProperty("user.dir");
-                    String path=currentDir+"\\"+"src\\main\\java\\";
-                    String packagePath=profile.getProject().getPojoPackage().replace(".","\\");
-                    String fileName=codeFile.getName()+".java";
-                    String filePath=path+packagePath+"\\"+fileName;
-                    //System.out.println(filePath);
-                    File file = new File(filePath);
-                    if(!overwrite&&file.exists()){
-                        // 自定义按钮文本
-                        Object[] options = { "覆盖此文件", "全部覆盖", "跳过" };
-                        // 显示确认对话框
-                        int response = JOptionPane.showOptionDialog(null,
-                                fileName+"已存在，是否覆盖文件？", // 提示信息
-                                "是否覆盖", // 标题
-                                JOptionPane.YES_NO_CANCEL_OPTION, // 选项类型
-                                JOptionPane.QUESTION_MESSAGE, // 消息类型
-                                null, // 图标
-                                options, // 按钮文本
-                                options[0]); // 默认选中的按钮
+                String currentDir = System.getProperty("user.dir");
+                String path=currentDir+"\\"+"src\\main\\java\\";
 
-                        // 根据用户的选择执行不同的操作
-                        switch (response) {
-                            case JOptionPane.NO_OPTION:
-                                // 用户选择了"全部覆盖"
-                                overwrite=true;
-                            case JOptionPane.YES_OPTION:
-                                // 用户选择了"覆盖"
-                                writeFile(file,codeFile.getCode());
-                                continue;
-                            case JOptionPane.CANCEL_OPTION:
-                                // 用户选择了"跳过"
-                                continue;
-                        }
-                    }else {
-                        writeFile(file,codeFile.getCode());
-                        continue;
-                    }
-                    submitButton.setText("提交");
-                    submitButton.setEnabled(true);
-                    return;
-                }
+                List<CodeFile> codeFileList=projectCode.getPojo();
+                String packagePath=profile.getProject().getPojoPackage().replace(".","\\");
+                writeCodeFile(codeFileList,submitButton,path+packagePath,"model");
+
+                packagePath=profile.getProject().getEntityPackage().replace(".","\\");
+                codeFileList=projectCode.getEntity();
+                writeCodeFile(codeFileList,submitButton,path+packagePath,"entity");
+
+                packagePath=profile.getProject().getMapperPackage().replace(".","\\");
+                codeFileList=projectCode.getMapper();
+                writeCodeFile(codeFileList,submitButton,path+packagePath,"mapper");
+
+                codeFileList=projectCode.getMapperXml();
+                writeCodeFile(codeFileList,submitButton,currentDir+"\\src\\main\\resources\\"+packagePath,"mapperXml");
+
                 JOptionPane.showMessageDialog(null,"已完成");
                 submitButton.setText("提交");
                 submitButton.setEnabled(true);
                 System.out.println("success!");
             }
         });
+    }
+
+    private void writeCodeFile(List<CodeFile> codeFileList,LhButton submitButton,String path,String tag){
+        boolean overwrite=false;
+        for(CodeFile codeFile:codeFileList){
+            //System.out.println(codeFile.getCode());
+            String fileName=codeFile.getName();
+            if(tag.equals("mapperXml")){
+                fileName+=".xml";
+            }else {
+                fileName+=".java";
+            }
+            String filePath=path+"\\"+fileName;
+            //System.out.println(filePath);
+            File file = new File(filePath);
+            if(!overwrite&&file.exists()){
+                // 自定义按钮文本
+                Object[] options = { "覆盖此文件", "覆盖所有"+tag, "跳过" };
+                // 显示确认对话框
+                int response = JOptionPane.showOptionDialog(null,
+                        fileName+"已存在，是否覆盖文件？", // 提示信息
+                        "是否覆盖", // 标题
+                        JOptionPane.YES_NO_CANCEL_OPTION, // 选项类型
+                        JOptionPane.QUESTION_MESSAGE, // 消息类型
+                        null, // 图标
+                        options, // 按钮文本
+                        options[0]); // 默认选中的按钮
+
+                // 根据用户的选择执行不同的操作
+                switch (response) {
+                    case JOptionPane.NO_OPTION:
+                        // 用户选择了"全部覆盖"
+                        overwrite=true;
+                    case JOptionPane.YES_OPTION:
+                        // 用户选择了"覆盖"
+                        writeFile(file,codeFile.getCode());
+                        continue;
+                    case JOptionPane.CANCEL_OPTION:
+                        // 用户选择了"跳过"
+                        continue;
+                }
+            }else {
+                writeFile(file,codeFile.getCode());
+                continue;
+            }
+            submitButton.setText("提交");
+            submitButton.setEnabled(true);
+            return;
+        }
     }
 
     private void writeFile(File file,String text){

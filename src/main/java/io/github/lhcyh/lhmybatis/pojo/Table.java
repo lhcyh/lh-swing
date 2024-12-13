@@ -249,7 +249,7 @@ public class Table {
         for (Field fieldItem:fieldList){
             String lupName=Utils.underscoreToCamel(fieldItem.getName(),false);
             if(fieldItem.getIsPrimaryKey()&&fieldItem.getType()== Field.Type.INT){
-                xmlHead+=" userGeneratedKey=\"true\" keyProperty=\""+lupName+"\"";
+                xmlHead+=" useGeneratedKey=\"true\" keyProperty=\""+lupName+"\"";
                 continue;
             }
             if(tableValue==null){
