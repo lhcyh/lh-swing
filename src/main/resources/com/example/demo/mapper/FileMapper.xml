@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.mapper.FileMapper">
-    <insert id="addFile" userGeneratedKey="true" keyProperty="id" parameterType="com.example.demo.pojo.File">
-         insert into file(url,file_id,remarks) values(#{url},#{fileId},#{remarks})
+    <insert id="addFile" useGeneratedKey="true" keyProperty="id" parameterType="com.example.demo.pojo.File">
+         insert into `file`(url,`file_id`,`remarks`) values(#{url},#{fileId},#{remarks})
     </insert>
+
     <delete id="deleteFileById">
-         delete from file where id=#{id}
+         delete from `file` where id=#{id}
     </delete>
+
     <update id="updateFile" parameterType="com.example.demo.pojo.File">
-        update file
+        update `file`
         <set>
-          <if test="url!=null">
-             url=#{url},
-          </if>
-          <if test="fileId!=null">
-             file_id=#{fileId},
-          </if>
-          <if test="remarks!=null">
-             remarks=#{remarks},
-          </if>
+            <if test="url!=null">
+               url=#{url},
+            </if>
+            <if test="fileId!=null">
+               file_id=#{fileId},
+            </if>
+            <if test="remarks!=null">
+               remarks=#{remarks},
+            </if>
         </set>
         where id=#{id}
     </update>
@@ -29,19 +31,15 @@
     </select>
 
 
-    <sql id="tableFieldMapping">
-       file.${field}
-    </sql>
-
     <sql id="exampleClause">
+        <foreach collection="leftJoinList" item="joinInfo">
+            left join ${joinInfo.rightTable} on ${joinInfo.leftTable}.${joinInfo.leftKey}=${joinInfo.rightTable}.${joinInfo.rightKey}
+        </foreach>
         <where>
             <foreach collection="orCriterionList" item="criterionList" separator="or">
                 <trim prefix="(" prefixOverrides="and" suffix=")">
                     <foreach collection="criterionList" item="criterion">
-                        and
-                        <bind name="table" value="criterion.table"/>
-                        <bind name="field" value="criterion.field"/>
-                        <include refid="tableFieldMapping"></include>
+                        and ${criterion.table}.${criterion.field}
                         <choose>
                             <when test="criterion.valueType=='noValue'">
                                 ${criterion.condition}
@@ -52,17 +50,19 @@
                             <when test="criterion.valueType=='betweenValue'">
                                 ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
                             </when>
+                            <when test="criterion.valueType=='listValue'">
+                                ${criterion.condition}
+                                <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                                    #{listItem}
+                                </foreach>
+                            </when>
                         </choose>
                     </foreach>
                 </trim>
             </foreach>
         </where>
         <if test="orderBy!=null">
-            <bind name="table" value="orderBy.table"/>
-            <bind name="field" value="orderBy.field"/>
-            order by
-            <include refid="tableFieldMapping"></include>
-            ${orderBy.condition}
+            order by ${orderBy.table}.${orderBy.field} ${orderBy.condition}
         </if>
         <if test="limitStart!=null">
             limit #{limitStart}
@@ -73,7 +73,7 @@
     </sql>
 
     <select id="getFileListByExample" parameterType="Example"  resultType="com.example.demo.pojo.File" >
-        select * from file
+        select * from `file`
         <include refid="exampleClause"></include>
     </select>
 

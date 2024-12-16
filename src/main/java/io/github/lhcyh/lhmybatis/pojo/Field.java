@@ -54,7 +54,7 @@ public class Field {
 
     public String getIfTag(String fill){
         String tag=fill+"<if test=\""+ Utils.underscoreToCamel(name,false)+"!=null\">\n"+
-                fill+"   "+name+"=#{"+ Utils.underscoreToCamel(name,false)+"},\n"+
+                fill+"   `"+name+"`=#{"+ Utils.underscoreToCamel(name,false)+"},\n"+
                 fill+"</if>";
         return tag;
     }

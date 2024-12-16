@@ -52,8 +52,9 @@ public class Table {
         return Utils.underscoreToCamel(name,true)+suffix;
     }
 
-    public String getPojoCode(){
-        String pojoCode ="public class "+getFileName("")+"{\n";
+    public String getPojoCode(Project project){
+        String pojoCode ="package "+project.getPojoPackage()+";\n\n";
+        pojoCode+="public class "+getFileName("")+"{\n";
         String propertyList="";
         String getSetList="";
         for(Field field:fieldList){
@@ -92,7 +93,9 @@ public class Table {
         if((foreignKeyList==null||foreignKeyList.size()==0)&&(associatedList==null||associatedList.size()==0)){
             return null;
         }
-        String entityCode="@JsonIgnoreProperties(value={\"handler\"})\n";
+        String entityCode="package "+project.getEntityPackage()+";\n\n";
+        entityCode+="import "+project.getPojoPackage()+"."+getFileName("")+"\n\n";
+        entityCode+="@JsonIgnoreProperties(value={\"handler\"})\n";
         entityCode+="public class "+getFileName("Entity")+" extends "+getFileName("")+"{\n";
         String entityGetSet="";
         for(ForeignKey foreignKey:foreignKeyList){
@@ -150,13 +153,20 @@ public class Table {
         String primaryKeyType=getPrimaryKey().getJavaType();
         String primaryKeyUpName= Utils.underscoreToCamel(getPrimaryKey().getName(),true);
         String primaryKeyDoName= Utils.underscoreToCamel(getPrimaryKey().getName(),false);
+        String epPackage="import ";
         String tName=null;
         if(getEntityCode(project)!=null){
             tName=upName+"Entity";
+            epPackage+=project.getEntityPackage();
         }else {
             tName=upName;
+            epPackage+=project.getPojoPackage();
         }
-        String mapperCode="@Mapper\n";
+        String mapperCode= "package "+ project.getMapperPackage()+";\n\n";
+        mapperCode+=epPackage+"."+tName+";\n";
+        mapperCode+="import java.util.List;\n";
+        mapperCode+="import org.apache.ibatis.annotations.Mapper;\n\n";
+        mapperCode+="@Mapper\n";
         mapperCode+="public interface "+upName+"Mapper{\n";
         mapperCode+="    public int add"+upName+"("+upName+" "+doName+");\n";
         mapperCode+="    public int delete"+upName+"By"+primaryKeyUpName+"("+primaryKeyType+" "+primaryKeyDoName+");\n";
@@ -243,7 +253,7 @@ public class Table {
         String upName= Utils.underscoreToCamel(name,true);
         String xmlHead=fill+"<insert id=\"add"+upName+"\"";
         String xml=" parameterType=\""+packageName+"."+upName+"\">\n";
-        xml+=fill+"     insert into "+name+"(";
+        xml+=fill+"     insert into `"+name+"`(";
         String tableValue=null;
         String beanValue=null;
         for (Field fieldItem:fieldList){
@@ -256,13 +266,13 @@ public class Table {
                 tableValue=fieldItem.getName();
                 beanValue="#{"+ lupName +"}";
             }else {
-                tableValue+=","+fieldItem.getName();
+                tableValue+=",`"+fieldItem.getName()+"`";
                 beanValue+=",#{"+ lupName +"}";
             }
         }
         xml=xmlHead+xml;
         xml+=tableValue+") values("+beanValue+")\n";
-        xml+=fill+"</insert>";
+        xml+=fill+"</insert>\n";
         return xml;
     }
 
@@ -272,8 +282,8 @@ public class Table {
         String pUpName= Utils.underscoreToCamel(pKeyName,true);
         String upName= Utils.underscoreToCamel(name,true);
         String xml=fill+"<delete id=\"delete"+upName+"By"+pUpName+"\">\n";
-        xml+=fill+"     delete from "+name+" where "+pKeyName+"=#{"+pDoName+"}\n";
-        xml+=fill+"</delete>";
+        xml+=fill+"     delete from `"+name+"` where "+pKeyName+"=#{"+pDoName+"}\n";
+        xml+=fill+"</delete>\n";
         return xml;
     }
 
@@ -282,13 +292,13 @@ public class Table {
         String pKeyName=getPrimaryKey().getName();
         String pDoName= Utils.underscoreToCamel(pKeyName,false);
         String xml=fill+"<update id=\"update"+upName+"\" parameterType=\""+packageName+"."+upName+"\">\n";
-        xml+=fill+"    update "+name+"\n";
+        xml+=fill+"    update `"+name+"`\n";
         xml+=fill+"    <set>\n";
         for(Field fieldItem:fieldList){
             if(fieldItem.getIsPrimaryKey()){
                 continue;
             }else {
-                xml+=fieldItem.getIfTag(fill+"   "+"   ")+"\n";
+                xml+=fieldItem.getIfTag(fill+"    "+"    ")+"\n";
             }
         }
         xml+=fill+"    </set>\n";
@@ -316,7 +326,7 @@ public class Table {
                 String fUpName= Utils.underscoreToCamel(fieldItem.getName(),true);
                 String fDoName= Utils.underscoreToCamel(fieldItem.getName(),false);
                 xml+=fill+"<select id=\"get"+upName+"By"+fUpName+"\""+result+">\n";
-                xml+=fill+"    select * from "+name+" where "+fieldItem.getName()+"=#{"+fDoName+"}\n";
+                xml+=fill+"    select * from `"+name+"` where `"+fieldItem.getName()+"`=#{"+fDoName+"}\n";
                 xml+=fill+"</select>\n";
             }
         }
@@ -334,7 +344,7 @@ public class Table {
                 switch (foreignKeyItem.getAssociate()) {
                     case ManyToOne:
                         xml += fill + "<select id=\"get" + upName + "ListBy" + fUpName + "\" " + result + ">\n";
-                        xml += fill + "    select * from " + name + " where " + foreignKeyItem.getFieldName() + "=#{" + fDoName + "}\n";
+                        xml += fill + "    select * from `" + name + "` where " + foreignKeyItem.getFieldName() + "=#{" + fDoName + "}\n";
                         xml += fill + "</select>\n";
                         break;
                 }
@@ -403,140 +413,182 @@ public class Table {
         return xml;
     }
 
-    public String getLeftJoinXml(String fill,Project project){
-        String leftJoin=fill+"<sql id=\"leftJoin\">\n";
-        if(foreignKeyList!=null) {
-            for (ForeignKey foreignKeyItem : foreignKeyList) {
-                if (foreignKeyItem.getAssociate() == ForeignKey.Associate.OneToOneL) {
-                    //String ftDoName= Utils.underscoreToCamel(foreignKeyItem.getReferencedTableName(),false);
-                    String ftUpName = Utils.underscoreToCamel(foreignKeyItem.getReferencedTableName(), true);
-                    leftJoin += fill + "    <if test=\"leftJoinTable=='" + foreignKeyItem.getReferencedFieldName() + "'\">\n";
-                    leftJoin += fill + "        left join " + foreignKeyItem.getReferencedTableName() + " on " + name + "." + foreignKeyItem.getFieldName() + "=" + foreignKeyItem.getReferencedTableName() + "." + foreignKeyItem.getReferencedFieldName() + "\n";
-                    leftJoin += fill + "    </if>\n";
-                    Table rTable = project.getTableByName(foreignKeyItem.getReferencedTableName());
-                    if (rTable.getLeftJoinXml(fill, project) != null) {
-                        leftJoin += fill + "    <include refid=\"" + project.getMapperPackage() + "." + ftUpName + "Mapper.leftJoin\"></include>\n";
-                    }
-                }
-            }
-        }
-        List<Table> associatedList=project.getAssociatedListByTableName(name);
-        for(Table tableItem:associatedList){
-            ForeignKey foreignKey=tableItem.getAssociateForeignKeyByTableName(name);
-            if(foreignKey.getAssociate()== ForeignKey.Associate.OneToOneR){
-                //String ftDoName= Utils.underscoreToCamel(tableItem.getName(),false);
-                String ftUpName= Utils.underscoreToCamel(tableItem.getName(),true);
-                leftJoin+=fill+"    <if test=\"leftJoinTable=='"+tableItem.getName()+"\"'>\n";
-                leftJoin+=fill+"        left join "+tableItem.getName()+" on "+name+"."+foreignKey.getReferencedFieldName()+"="+tableItem.getName()+"."+foreignKey.getFieldName()+"\n";
-                leftJoin+=fill+"    </if>\n";
-                Table rTable=project.getTableByName(tableItem.getName());
-                if(rTable.getLeftJoinXml(fill,project)!=null){
-                    leftJoin+=fill+"    <include refid=\""+project.getMapperPackage()+"."+ftUpName+"Mapper.leftJoin\"></include>\n";
-                }
-            }
-        }
-        if(leftJoin.equals(fill+"<sql id=\"leftJoin\">\n")){
-            return null;
-        }else {
-            leftJoin+=fill+"</sql>\n";
-            return leftJoin;
-        }
-    }
+//    public String getLeftJoinXml(String fill,Project project){
+//        String leftJoin=fill+"<sql id=\"leftJoin\">\n";
+//        if(foreignKeyList!=null) {
+//            for (ForeignKey foreignKeyItem : foreignKeyList) {
+//                if (foreignKeyItem.getAssociate() == ForeignKey.Associate.OneToOneL) {
+//                    //String ftDoName= Utils.underscoreToCamel(foreignKeyItem.getReferencedTableName(),false);
+//                    String ftUpName = Utils.underscoreToCamel(foreignKeyItem.getReferencedTableName(), true);
+//                    leftJoin += fill + "    <if test=\"leftJoinTable=='" + foreignKeyItem.getReferencedFieldName() + "'\">\n";
+//                    leftJoin += fill + "        left join " + foreignKeyItem.getReferencedTableName() + " on " + name + "." + foreignKeyItem.getFieldName() + "=" + foreignKeyItem.getReferencedTableName() + "." + foreignKeyItem.getReferencedFieldName() + "\n";
+//                    leftJoin += fill + "    </if>\n";
+//                    Table rTable = project.getTableByName(foreignKeyItem.getReferencedTableName());
+//                    if (rTable.getLeftJoinXml(fill, project) != null) {
+//                        leftJoin += fill + "    <include refid=\"" + project.getMapperPackage() + "." + ftUpName + "Mapper.leftJoin\"></include>\n";
+//                    }
+//                }
+//            }
+//        }
+//        List<Table> associatedList=project.getAssociatedListByTableName(name);
+//        for(Table tableItem:associatedList){
+//            ForeignKey foreignKey=tableItem.getAssociateForeignKeyByTableName(name);
+//            if(foreignKey.getAssociate()== ForeignKey.Associate.OneToOneR){
+//                //String ftDoName= Utils.underscoreToCamel(tableItem.getName(),false);
+//                String ftUpName= Utils.underscoreToCamel(tableItem.getName(),true);
+//                leftJoin+=fill+"    <if test=\"leftJoinTable=='"+tableItem.getName()+"\"'>\n";
+//                leftJoin+=fill+"        left join "+tableItem.getName()+" on "+name+"."+foreignKey.getReferencedFieldName()+"="+tableItem.getName()+"."+foreignKey.getFieldName()+"\n";
+//                leftJoin+=fill+"    </if>\n";
+//                Table rTable=project.getTableByName(tableItem.getName());
+//                if(rTable.getLeftJoinXml(fill,project)!=null){
+//                    leftJoin+=fill+"    <include refid=\""+project.getMapperPackage()+"."+ftUpName+"Mapper.leftJoin\"></include>\n";
+//                }
+//            }
+//        }
+//        if(leftJoin.equals(fill+"<sql id=\"leftJoin\">\n")){
+//            return null;
+//        }else {
+//            leftJoin+=fill+"</sql>\n";
+//            return leftJoin;
+//        }
+//    }
 
-    private String getTableFieldMapping(String fill,Project project){
-        String head=fill+"<sql id=\"tableFieldMapping\">\n";
-        String body="";
-        if(foreignKeyList!=null) {
-            for (ForeignKey foreignKeyItem : foreignKeyList) {
-                if (foreignKeyItem.getAssociate() == ForeignKey.Associate.OneToOneL) {
-                    String ftDoName = Utils.underscoreToCamel(foreignKeyItem.getReferencedTableName(), false);
-                    String ftUpName = Utils.underscoreToCamel(foreignKeyItem.getReferencedTableName(), true);
-                    body += fill + "        <when test=\"table=='" + ftDoName + "'\">\n";
-                    body += fill + "            <include refid=\"" + project.getMapperPackage() + "." + ftUpName + "Mapper.tableFieldMapping\"></include>\n";
-                    body += fill + "        </when>\n";
-                }
-            }
-        }
-        List<Table> associatedList=project.getAssociatedListByTableName(name);
-        for(Table tableItem:associatedList){
-            ForeignKey foreignKey=tableItem.getAssociateForeignKeyByTableName(name);
-            if(foreignKey.getAssociate()== ForeignKey.Associate.OneToOneR){
-                String ftDoName= Utils.underscoreToCamel(tableItem.getName(),false);
-                String ftUpName= Utils.underscoreToCamel(tableItem.getName(),true);
-                body+=fill+"        <when test=\"table=='"+ftDoName+"'\">\n";
-                body+=fill+"            <include refid=\""+project.getMapperPackage()+"."+ftUpName+"Mapper.tableFieldMapping\"></include>\n";
-                body+=fill+"        </when>\n";
-            }
-        }
-        if(body.equals("")){
-            body=fill+"   "+name+".${field}\n";
-        }else {
-            head+=fill+"    <choose>\n";
-            body+=fill+"        <otherwise>\n";
-            body+=fill+"            "+name+".${field}\n";
-            body+=fill+"        </otherwise>\n";
-            body+=fill+"    </choose>\n";
-        }
-        String tfMapping=head+body;
-        tfMapping+=fill+"</sql>\n";
-        return tfMapping;
-    }
+//    private String getTableFieldMapping(String fill,Project project){
+//        String head=fill+"<sql id=\"tableFieldMapping\">\n";
+//        String body="";
+//        if(foreignKeyList!=null) {
+//            for (ForeignKey foreignKeyItem : foreignKeyList) {
+//                if (foreignKeyItem.getAssociate() == ForeignKey.Associate.OneToOneL) {
+//                    String ftDoName = Utils.underscoreToCamel(foreignKeyItem.getReferencedTableName(), false);
+//                    String ftUpName = Utils.underscoreToCamel(foreignKeyItem.getReferencedTableName(), true);
+//                    body += fill + "        <when test=\"table=='" + ftDoName + "'\">\n";
+//                    body += fill + "            <include refid=\"" + project.getMapperPackage() + "." + ftUpName + "Mapper.tableFieldMapping\"></include>\n";
+//                    body += fill + "        </when>\n";
+//                }
+//            }
+//        }
+//        List<Table> associatedList=project.getAssociatedListByTableName(name);
+//        for(Table tableItem:associatedList){
+//            ForeignKey foreignKey=tableItem.getAssociateForeignKeyByTableName(name);
+//            if(foreignKey.getAssociate()== ForeignKey.Associate.OneToOneR){
+//                String ftDoName= Utils.underscoreToCamel(tableItem.getName(),false);
+//                String ftUpName= Utils.underscoreToCamel(tableItem.getName(),true);
+//                body+=fill+"        <when test=\"table=='"+ftDoName+"'\">\n";
+//                body+=fill+"            <include refid=\""+project.getMapperPackage()+"."+ftUpName+"Mapper.tableFieldMapping\"></include>\n";
+//                body+=fill+"        </when>\n";
+//            }
+//        }
+//        if(body.equals("")){
+//            body=fill+"   "+name+".${field}\n";
+//        }else {
+//            head+=fill+"    <choose>\n";
+//            body+=fill+"        <otherwise>\n";
+//            body+=fill+"            "+name+".${field}\n";
+//            body+=fill+"        </otherwise>\n";
+//            body+=fill+"    </choose>\n";
+//        }
+//        String tfMapping=head+body;
+//        tfMapping+=fill+"</sql>\n";
+//        return tfMapping;
+//    }
 
-    private String getExampleClause(String fill,Project project){
+    private String getExampleClause(){
+//        String exampleClause=
+//                fill+"<sql id=\"exampleClause\">\n";
+//        String leftJoin=getLeftJoinXml(fill,project);
+//        if(leftJoin!=null){
+//            exampleClause+=
+//                fill+"    <foreach collection=\"leftJoinList\" item=\"leftJoinTable\">\n" +
+//                fill+"        <include refid=\"leftJoin\"></include>\n" +
+//                fill+"    </foreach>\n";
+//        }
+//        exampleClause+=
+//                fill+"    <where>\n" +
+//                fill+"        <foreach collection=\"orCriterionList\" item=\"criterionList\" separator=\"or\">\n" +
+//                fill+"            <trim prefix=\"(\" prefixOverrides=\"and\" suffix=\")\">\n" +
+//                fill+"                <foreach collection=\"criterionList\" item=\"criterion\">\n" +
+//                fill+"                    and\n" +
+//                fill+"                    <bind name=\"table\" value=\"criterion.table\"/>\n" +
+//                fill+"                    <bind name=\"field\" value=\"criterion.field\"/>\n" +
+//                fill+"                    <include refid=\"tableFieldMapping\"></include>\n" +
+//                fill+"                    <choose>\n" +
+//                fill+"                        <when test=\"criterion.valueType=='noValue'\">\n" +
+//                fill+"                            ${criterion.condition}\n" +
+//                fill+"                        </when>\n" +
+//                fill+"                        <when test=\"criterion.valueType=='singleValue'\">\n" +
+//                fill+"                            ${criterion.condition} #{criterion.value}\n" +
+//                fill+"                        </when>\n" +
+//                fill+"                        <when test=\"criterion.valueType=='betweenValue'\">\n" +
+//                fill+"                            ${criterion.condition} #{criterion.value} and #{criterion.secondValue}\n" +
+//                fill+"                        </when>\n" +
+//                fill+"                    </choose>\n" +
+//                fill+"                </foreach>\n" +
+//                fill+"            </trim>\n" +
+//                fill+"        </foreach>\n" +
+//                fill+"    </where>\n" +
+//                fill+"    <if test=\"orderBy!=null\">\n" +
+//                fill+"        <bind name=\"table\" value=\"orderBy.table\"/>\n" +
+//                fill+"        <bind name=\"field\" value=\"orderBy.field\"/>\n" +
+//                fill+"        order by\n" +
+//                fill+"        <include refid=\"tableFieldMapping\"></include>\n" +
+//                fill+"        ${orderBy.condition}\n" +
+//                fill+"    </if>\n" +
+//                fill+"    <if test=\"limitStart!=null\">\n" +
+//                fill+"        limit #{limitStart}\n" +
+//                fill+"        <if test=\"limitNum!=null\">\n" +
+//                fill+"            ,#{limitNum}\n" +
+//                fill+"        </if>\n" +
+//                fill+"    </if>\n"+
+//                fill+"</sql>\n";
+
         String exampleClause=
-                fill+"<sql id=\"exampleClause\">\n";
-        String leftJoin=getLeftJoinXml(fill,project);
-        if(leftJoin!=null){
-            exampleClause+=
-                fill+"    <foreach collection=\"leftJoinList\" item=\"leftJoinTable\">\n" +
-                fill+"        <include refid=\"leftJoin\"></include>\n" +
-                fill+"    </foreach>\n";
-        }
-        exampleClause+=
-                fill+"    <where>\n" +
-                fill+"        <foreach collection=\"orCriterionList\" item=\"criterionList\" separator=\"or\">\n" +
-                fill+"            <trim prefix=\"(\" prefixOverrides=\"and\" suffix=\")\">\n" +
-                fill+"                <foreach collection=\"criterionList\" item=\"criterion\">\n" +
-                fill+"                    and\n" +
-                fill+"                    <bind name=\"table\" value=\"criterion.table\"/>\n" +
-                fill+"                    <bind name=\"field\" value=\"criterion.field\"/>\n" +
-                fill+"                    <include refid=\"tableFieldMapping\"></include>\n" +
-                fill+"                    <choose>\n" +
-                fill+"                        <when test=\"criterion.valueType=='noValue'\">\n" +
-                fill+"                            ${criterion.condition}\n" +
-                fill+"                        </when>\n" +
-                fill+"                        <when test=\"criterion.valueType=='singleValue'\">\n" +
-                fill+"                            ${criterion.condition} #{criterion.value}\n" +
-                fill+"                        </when>\n" +
-                fill+"                        <when test=\"criterion.valueType=='betweenValue'\">\n" +
-                fill+"                            ${criterion.condition} #{criterion.value} and #{criterion.secondValue}\n" +
-                fill+"                        </when>\n" +
-                fill+"                    </choose>\n" +
-                fill+"                </foreach>\n" +
-                fill+"            </trim>\n" +
-                fill+"        </foreach>\n" +
-                fill+"    </where>\n" +
-                fill+"    <if test=\"orderBy!=null\">\n" +
-                fill+"        <bind name=\"table\" value=\"orderBy.table\"/>\n" +
-                fill+"        <bind name=\"field\" value=\"orderBy.field\"/>\n" +
-                fill+"        order by\n" +
-                fill+"        <include refid=\"tableFieldMapping\"></include>\n" +
-                fill+"        ${orderBy.condition}\n" +
-                fill+"    </if>\n" +
-                fill+"    <if test=\"limitStart!=null\">\n" +
-                fill+"        limit #{limitStart}\n" +
-                fill+"        <if test=\"limitNum!=null\">\n" +
-                fill+"            ,#{limitNum}\n" +
-                fill+"        </if>\n" +
-                fill+"    </if>\n"+
-                fill+"</sql>\n";
+                "    <sql id=\"exampleClause\">\n" +
+                "        <foreach collection=\"leftJoinList\" item=\"joinInfo\">\n" +
+                "            left join ${joinInfo.rightTable} on ${joinInfo.leftTable}.${joinInfo.leftKey}=${joinInfo.rightTable}.${joinInfo.rightKey}\n" +
+                "        </foreach>\n" +
+                "        <where>\n" +
+                "            <foreach collection=\"orCriterionList\" item=\"criterionList\" separator=\"or\">\n" +
+                "                <trim prefix=\"(\" prefixOverrides=\"and\" suffix=\")\">\n" +
+                "                    <foreach collection=\"criterionList\" item=\"criterion\">\n" +
+                "                        and ${criterion.table}.${criterion.field}\n" +
+                "                        <choose>\n" +
+                "                            <when test=\"criterion.valueType=='noValue'\">\n" +
+                "                                ${criterion.condition}\n" +
+                "                            </when>\n" +
+                "                            <when test=\"criterion.valueType=='singleValue'\">\n" +
+                "                                ${criterion.condition} #{criterion.value}\n" +
+                "                            </when>\n" +
+                "                            <when test=\"criterion.valueType=='betweenValue'\">\n" +
+                "                                ${criterion.condition} #{criterion.value} and #{criterion.secondValue}\n" +
+                "                            </when>\n" +
+                "                            <when test=\"criterion.valueType=='listValue'\">\n" +
+                "                                ${criterion.condition}\n" +
+                "                                <foreach close=\")\" collection=\"criterion.value\" item=\"listItem\" open=\"(\" separator=\",\">\n" +
+                "                                    #{listItem}\n" +
+                "                                </foreach>\n" +
+                "                            </when>\n" +
+                "                        </choose>\n" +
+                "                    </foreach>\n" +
+                "                </trim>\n" +
+                "            </foreach>\n" +
+                "        </where>\n" +
+                "        <if test=\"orderBy!=null\">\n" +
+                "            order by ${orderBy.table}.${orderBy.field} ${orderBy.condition}\n" +
+                "        </if>\n" +
+                "        <if test=\"limitStart!=null\">\n" +
+                "            limit #{limitStart}\n" +
+                "            <if test=\"limitNum!=null\">\n" +
+                "                ,#{limitNum}\n" +
+                "            </if>\n" +
+                "        </if>\n" +
+                "    </sql>\n";
         return exampleClause;
     }
 
     private String getGetListByExampleXml(Project project,String fill){
         String upName= Utils.underscoreToCamel(name,true);
         String xml=fill+"<select id=\"get"+upName+"ListByExample\" parameterType=\""+"Example\" "+getResultXml(project)+">\n";
-        xml+=fill+"    select * from "+name+"\n";
+        xml+=fill+"    select * from `"+name+"`\n";
         xml+=fill+"    <include refid=\"exampleClause\"></include>\n";
         xml+=fill+"</select>\n";
         return xml;
@@ -553,12 +605,13 @@ public class Table {
         xml+=getBaseMapXml("    ",project)+"\n";
         xml+=getGetByUniqueFieldXml("    ",project)+"\n";
         xml+=getGetListByForeignKeyXml("    ",project)+"\n";
-        xml+=getTableFieldMapping("    ",project)+"\n";
-        String leftJoin=getLeftJoinXml("    ",project);
-        if(leftJoin!=null){
-            xml+=leftJoin+"\n";
-        }
-        xml+=getExampleClause("    ",project)+"\n";
+//        xml+=getTableFieldMapping("    ",project)+"\n";
+//        String leftJoin=getLeftJoinXml("    ",project);
+//        if(leftJoin!=null){
+//            xml+=leftJoin+"\n";
+//        }
+//        xml+=getExampleClause("    ",project)+"\n";
+        xml+=getExampleClause()+"\n";
         xml+=getGetListByExampleXml(project,"    ")+"\n";
         xml+="</mapper>\n";
         return  xml;

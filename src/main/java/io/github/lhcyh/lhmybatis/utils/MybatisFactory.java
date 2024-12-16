@@ -18,7 +18,7 @@ public class MybatisFactory {
         for(Table table:project.getTableList()){
             CodeFile pojoCodeFile=new CodeFile();
             pojoCodeFile.setName(table.getFileName(""));
-            pojoCodeFile.setCode(table.getPojoCode());
+            pojoCodeFile.setCode(table.getPojoCode(project));
             this.projectCode.getPojo().add(pojoCodeFile);
 
             String code=table.getEntityCode(project);
