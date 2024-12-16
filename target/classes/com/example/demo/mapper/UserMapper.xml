@@ -2,15 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.mapper.UserMapper">
     <insert id="addUser" useGeneratedKey="true" keyProperty="id" parameterType="com.example.demo.pojo.User">
-         insert into user(account,password,role) values(#{account},#{password},#{role})
+         insert into `user`(account,`password`,`role`) values(#{account},#{password},#{role})
     </insert>
 
     <delete id="deleteUserById">
-         delete from user where id=#{id}
+         delete from `user` where id=#{id}
     </delete>
 
     <update id="updateUser" parameterType="com.example.demo.pojo.User">
-        update user
+        update `user`
         <set>
             <if test="account!=null">
                account=#{account},
@@ -73,7 +73,7 @@
     </sql>
 
     <select id="getUserListByExample" parameterType="Example"  resultType="com.example.demo.pojo.User" >
-        select * from user
+        select * from `user`
         <include refid="exampleClause"></include>
     </select>
 

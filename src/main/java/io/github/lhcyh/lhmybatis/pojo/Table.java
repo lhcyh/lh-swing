@@ -2,9 +2,10 @@ package io.github.lhcyh.lhmybatis.pojo;
 
 import io.github.lhcyh.lhmybatis.utils.Utils;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Table {
+public class Table implements Serializable {
     private String name;
     private List<Field> fieldList;
     private List<ForeignKey> foreignKeyList;
@@ -93,19 +94,25 @@ public class Table {
         if((foreignKeyList==null||foreignKeyList.size()==0)&&(associatedList==null||associatedList.size()==0)){
             return null;
         }
-        String entityCode="package "+project.getEntityPackage()+";\n\n";
-        entityCode+="import "+project.getPojoPackage()+"."+getFileName("")+"\n\n";
-        entityCode+="@JsonIgnoreProperties(value={\"handler\"})\n";
+        String entityCodeHead="package "+project.getEntityPackage()+";\n\n";
+        entityCodeHead+="import com.fasterxml.jackson.annotation.JsonIgnoreProperties;\n";
+        entityCodeHead+="import "+project.getPojoPackage()+"."+getFileName("")+";\n";
+        String entityCode="@JsonIgnoreProperties(value={\"handler\"})\n";
         entityCode+="public class "+getFileName("Entity")+" extends "+getFileName("")+"{\n";
         String entityGetSet="";
         for(ForeignKey foreignKey:foreignKeyList){
+            System.out.println("forek");
+            System.out.println(foreignKey);
             if(foreignKey.getAssociate()== ForeignKey.Associate.OneToOneL){
                 String upCamelName= Utils.underscoreToCamel(foreignKey.getReferencedTableName(),true);
                 String doCamelName= Utils.underscoreToCamel(foreignKey.getReferencedTableName(),false);
+                entityCodeHead+="import "+project.getPojoPackage()+"."+upCamelName;
                 if(project.getTableByName(foreignKey.getReferencedTableName()).getEntityCode(project)!=null){
                     upCamelName+="Entity";
                     doCamelName+="Entity";
+                    entityCodeHead+="Entity";
                 }
+                entityCodeHead+=";\n";
                 entityCode+="     private "+upCamelName+" "+doCamelName+";\n";
                 entityGetSet+="     public "+upCamelName+" get"+upCamelName+"(){\n";
                 entityGetSet+="          return "+doCamelName+";\n";
@@ -143,7 +150,7 @@ public class Table {
         if(entityGetSet.equals("")){
             return null;
         }else {
-            return entityCode+"\n"+entityGetSet+"}\n";
+            return entityCodeHead+entityCode+"\n"+entityGetSet+"}\n";
         }
     }
 
@@ -263,7 +270,7 @@ public class Table {
                 continue;
             }
             if(tableValue==null){
-                tableValue=fieldItem.getName();
+                tableValue="`"+fieldItem.getName()+"`";
                 beanValue="#{"+ lupName +"}";
             }else {
                 tableValue+=",`"+fieldItem.getName()+"`";

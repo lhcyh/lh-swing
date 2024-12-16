@@ -2,7 +2,9 @@ package io.github.lhcyh.lhmybatis.pojo;
 
 import io.github.lhcyh.lhmybatis.utils.Utils;
 
-public class Field {
+import java.io.Serializable;
+
+public class Field implements Serializable {
     public enum Type{
         VARCHAR("varchar"),
         INT("int"),

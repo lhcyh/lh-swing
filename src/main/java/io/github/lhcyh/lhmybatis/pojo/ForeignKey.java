@@ -1,6 +1,8 @@
 package io.github.lhcyh.lhmybatis.pojo;
 
-public class ForeignKey {
+import java.io.Serializable;
+
+public class ForeignKey implements Serializable {
     public enum Associate{
         OneToOneR("1->1"),
         OneToOneL("1<-1"),

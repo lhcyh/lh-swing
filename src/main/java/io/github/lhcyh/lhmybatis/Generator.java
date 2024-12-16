@@ -779,6 +779,7 @@ public class Generator{
                 profile.getProject().setPojoPackage(pojoInput.getText());
                 profile.getProject().setEntityPackage(entityInput.getText());
                 profile.getProject().setMapperPackage(mapperInput.getText());
+                setProfile(profile);
 
                 MybatisFactory mybatisFactory=new MybatisFactory(profile.getProject());
                 ProjectCode projectCode=mybatisFactory.getProjectCode();

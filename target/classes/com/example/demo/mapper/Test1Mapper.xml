@@ -1,33 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.FileMapper">
-    <insert id="addFile" useGeneratedKey="true" keyProperty="id" parameterType="com.example.demo.pojo.File">
-         insert into `file`(url,`file_id`,`remarks`) values(#{url},#{fileId},#{remarks})
+<mapper namespace="com.example.demo.mapper.Test1Mapper">
+    <insert id="addTest1" useGeneratedKey="true" keyProperty="id" parameterType="com.example.demo.pojo.Test1">
+         insert into `test1`(`varchar`,`test2_id`,`upload_time`,`bit`) values(#{varchar},#{test2Id},#{uploadTime},#{bit})
     </insert>
 
-    <delete id="deleteFileById">
-         delete from `file` where id=#{id}
+    <delete id="deleteTest1ById">
+         delete from `test1` where id=#{id}
     </delete>
 
-    <update id="updateFile" parameterType="com.example.demo.pojo.File">
-        update `file`
+    <update id="updateTest1" parameterType="com.example.demo.pojo.Test1">
+        update `test1`
         <set>
-            <if test="url!=null">
-               url=#{url},
+            <if test="varchar!=null">
+               `varchar`=#{varchar},
             </if>
-            <if test="fileId!=null">
-               file_id=#{fileId},
+            <if test="test2Id!=null">
+               `test2_id`=#{test2Id},
             </if>
-            <if test="remarks!=null">
-               remarks=#{remarks},
+            <if test="uploadTime!=null">
+               `upload_time`=#{uploadTime},
+            </if>
+            <if test="bit!=null">
+               `bit`=#{bit},
             </if>
         </set>
         where id=#{id}
     </update>
 
 
-    <select id="getFileById" resultType="com.example.demo.pojo.File" >
-        select * from file where id=#{id}
+    <select id="getTest1ById" resultType="com.example.demo.pojo.Test1" >
+        select * from `test1` where `id`=#{id}
+    </select>
+    <select id="getTest1ByVarchar" resultType="com.example.demo.pojo.Test1" >
+        select * from `test1` where `varchar`=#{varchar}
     </select>
 
 
@@ -72,8 +78,8 @@
         </if>
     </sql>
 
-    <select id="getFileListByExample" parameterType="Example"  resultType="com.example.demo.pojo.File" >
-        select * from `file`
+    <select id="getTest1ListByExample" parameterType="Example"  resultType="com.example.demo.pojo.Test1" >
+        select * from `test1`
         <include refid="exampleClause"></include>
     </select>
 

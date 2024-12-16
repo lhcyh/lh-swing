@@ -1,33 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.FileMapper">
-    <insert id="addFile" useGeneratedKey="true" keyProperty="id" parameterType="com.example.demo.pojo.File">
-         insert into `file`(url,`file_id`,`remarks`) values(#{url},#{fileId},#{remarks})
+<mapper namespace="com.example.demo.mapper.Test2Mapper">
+    <insert id="addTest2" parameterType="com.example.demo.pojo.Test2">
+         insert into `test2`(`id`,`varchar`) values(#{id},#{varchar})
     </insert>
 
-    <delete id="deleteFileById">
-         delete from `file` where id=#{id}
+    <delete id="deleteTest2ById">
+         delete from `test2` where id=#{id}
     </delete>
 
-    <update id="updateFile" parameterType="com.example.demo.pojo.File">
-        update `file`
+    <update id="updateTest2" parameterType="com.example.demo.pojo.Test2">
+        update `test2`
         <set>
-            <if test="url!=null">
-               url=#{url},
-            </if>
-            <if test="fileId!=null">
-               file_id=#{fileId},
-            </if>
-            <if test="remarks!=null">
-               remarks=#{remarks},
+            <if test="varchar!=null">
+               `varchar`=#{varchar},
             </if>
         </set>
         where id=#{id}
     </update>
 
 
-    <select id="getFileById" resultType="com.example.demo.pojo.File" >
-        select * from file where id=#{id}
+    <select id="getTest2ById" resultType="com.example.demo.pojo.Test2" >
+        select * from `test2` where `id`=#{id}
     </select>
 
 
@@ -72,8 +66,8 @@
         </if>
     </sql>
 
-    <select id="getFileListByExample" parameterType="Example"  resultType="com.example.demo.pojo.File" >
-        select * from `file`
+    <select id="getTest2ListByExample" parameterType="Example"  resultType="com.example.demo.pojo.Test2" >
+        select * from `test2`
         <include refid="exampleClause"></include>
     </select>
 

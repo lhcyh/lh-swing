@@ -1,9 +1,10 @@
 package io.github.lhcyh.lhmybatis.pojo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Project {
+public class Project implements Serializable {
     private String name;
     private List<Table> tableList;
     //private String basePackage;
