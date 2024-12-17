@@ -68,11 +68,13 @@ public class Generator{
     }
 
     private void createConnectPanel(){
-        LhDiv contentDiv=new LhDiv();
-        contentDiv.setFlexDirection(FlexDirection.COLUMN);
-        contentDiv.setJustifyContent(JustifyContent.CENTER);
-        contentDiv.setAlignItems(AlignItems.CENTER);
+//        LhDiv contentDiv=new LhDiv();
+//        contentDiv.setFlexDirection(FlexDirection.COLUMN);
+//        contentDiv.setJustifyContent(JustifyContent.CENTER);
+//        contentDiv.setAlignItems(AlignItems.CENTER);
+
         LhTable lhTable=new LhTable(10);
+        int inputWidth=400;
 
         LhRow row1=lhTable.addRow();
         LhLabel url=new LhLabel("url:");
@@ -80,6 +82,7 @@ public class Generator{
         row1.addComponent(url);
         LhInput urlInput=new LhInput();
         urlInput.setFontSize(tSize3);
+        urlInput.setWidth(inputWidth);
         urlInput.setText("jdbc:mysql://localhost:3306/database_name?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai");
         row1.addComponent(urlInput);
 
@@ -89,6 +92,7 @@ public class Generator{
         row2.addComponent(username);
         LhInput usernameInput=new LhInput();
         usernameInput.setFontSize(tSize3);
+        usernameInput.setWidth(inputWidth);
         usernameInput.setText("root");
         row2.addComponent(usernameInput);
 
@@ -98,6 +102,7 @@ public class Generator{
         row3.addComponent(password);
         LhInput passwordInput=new LhInput();
         passwordInput.setFontSize(tSize3);
+        passwordInput.setWidth(inputWidth);
         row3.addComponent(passwordInput);
 
         LhRow row4=lhTable.addRow();
@@ -106,6 +111,7 @@ public class Generator{
         row4.addComponent(driverClass);
         LhInput driverClassInput=new LhInput();
         driverClassInput.setFontSize(tSize3);
+        driverClassInput.setWidth(inputWidth);
         driverClassInput.setText("com.mysql.cj.jdbc.Driver");
         row4.addComponent(driverClassInput);
 
@@ -149,9 +155,10 @@ public class Generator{
             }
         });
 
-        contentDiv.add(lhTable);
-        contentDiv.add(button);
-        this.rootDiv.add(contentDiv);
+        this.rootDiv.setFlexDirection(FlexDirection.COLUMN);
+        this.rootDiv.setJustifyContent(JustifyContent.SPACE_AROUND);
+        this.rootDiv.add(lhTable);
+        this.rootDiv.add(button);
     }
 
     private void createSelectPanel(){
@@ -162,6 +169,7 @@ public class Generator{
         contentDiv.setHeightPercent(1f);
         contentDiv.setFlexDirection(FlexDirection.COLUMN);
         contentDiv.setAlignItems(AlignItems.CENTER);
+        contentDiv.setJustifyContent(JustifyContent.SPACE_AROUND);
 
         LhDiv select=new LhDiv();
         contentDiv.add(select);
@@ -176,14 +184,13 @@ public class Generator{
         select.add(sTitle);
 
         LhCheckBox allCheck=new LhCheckBox("全选");
-        allCheck.setPadding(50);
         allCheck.setFontSize(tSize2);
         select.add(allCheck);
 
         LhScrollPane lhScrollPane=new LhScrollPane();
         select.add(lhScrollPane);
         lhScrollPane.setWidthPercent(0.9f);
-        lhScrollPane.setHeightPercent(0.86f);
+        lhScrollPane.setHeightPercent(0.7f);
         LhDiv scrDiv=lhScrollPane.getDiv();
         scrDiv.setFlexDirection(FlexDirection.COLUMN);
 

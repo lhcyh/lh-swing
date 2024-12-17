@@ -50,7 +50,7 @@ public class LhBody extends JFrame {
              */
             @Override
             public void componentResized(ComponentEvent e) {
-                int topHeight=30;
+                int topHeight=60;
                 LhDiv div=that.getDiv();
                 div.setSize(that.getWidth(),that.getHeight()-topHeight);
             }
