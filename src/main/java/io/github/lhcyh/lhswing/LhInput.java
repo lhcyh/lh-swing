@@ -23,9 +23,9 @@ public class LhInput extends JTextField {
         this.setSize(width,this.getHeight());
     }
 
-    public void setFontSize(int size){
-        Font font=this.getFont();
-        font.deriveFont(size);
+    public void setFontSize(float size){
+        Font font=this.getFont().deriveFont(size);
         this.setFont(font);
+        this.updateComponent();
     }
 }

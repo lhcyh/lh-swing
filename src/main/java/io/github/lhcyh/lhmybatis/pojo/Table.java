@@ -101,23 +101,22 @@ public class Table implements Serializable {
         entityCode+="public class "+getFileName("Entity")+" extends "+getFileName("")+"{\n";
         String entityGetSet="";
         for(ForeignKey foreignKey:foreignKeyList){
-            System.out.println("forek");
-            System.out.println(foreignKey);
             if(foreignKey.getAssociate()== ForeignKey.Associate.OneToOneL){
                 String upCamelName= Utils.underscoreToCamel(foreignKey.getReferencedTableName(),true);
                 String doCamelName= Utils.underscoreToCamel(foreignKey.getReferencedTableName(),false);
-                entityCodeHead+="import "+project.getPojoPackage()+"."+upCamelName;
+                String entity="";
                 if(project.getTableByName(foreignKey.getReferencedTableName()).getEntityCode(project)!=null){
-                    upCamelName+="Entity";
-                    doCamelName+="Entity";
-                    entityCodeHead+="Entity";
+                    entity="Entity";
+                    entityCodeHead+="import "+project.getEntityPackage()+"."+upCamelName+"Entity;\n";
+                }else {
+                    entityCodeHead+="import "+project.getPojoPackage()+"."+upCamelName+";\n";
                 }
                 entityCodeHead+=";\n";
-                entityCode+="     private "+upCamelName+" "+doCamelName+";\n";
-                entityGetSet+="     public "+upCamelName+" get"+upCamelName+"(){\n";
+                entityCode+="     private "+upCamelName+entity+" "+doCamelName+";\n";
+                entityGetSet+="     public "+upCamelName+entity+" get"+upCamelName+"(){\n";
                 entityGetSet+="          return "+doCamelName+";\n";
                 entityGetSet+="     }\n\n";
-                entityGetSet+="     public void set"+upCamelName+"("+upCamelName+" "+doCamelName+"){\n";
+                entityGetSet+="     public void set"+upCamelName+"("+upCamelName+entity+" "+doCamelName+"){\n";
                 entityGetSet+="          this."+doCamelName+"="+doCamelName+";\n";
                 entityGetSet+="     }\n\n";
             }
@@ -126,31 +125,41 @@ public class Table implements Serializable {
         for(Table table:associatedList){
             String upCamelName= Utils.underscoreToCamel(table.getName(),true);
             String doCamelName= Utils.underscoreToCamel(table.getName(),false);
+            String entity="";
+            if(table.getEntityCode(project)!=null){
+                entity="Entity";
+                entityCodeHead+="import "+project.getEntityPackage()+"."+upCamelName+"Entity;\n";
+            }else {
+                entityCodeHead+="import "+project.getPojoPackage()+"."+upCamelName+";\n";
+            }
             switch (table.getAssociateForeignKeyByTableName(name).getAssociate()){
                 case OneToOneR:
-                    entityCode+="    private "+upCamelName+"  "+doCamelName+";\n";
-                    entityGetSet+="    public "+upCamelName+" get"+upCamelName+"(){\n";
+                    entityCode+="    private "+upCamelName+entity+"  "+doCamelName+";\n";
+                    entityGetSet+="    public "+upCamelName+entity+" get"+upCamelName+"(){\n";
                     entityGetSet+="        return "+doCamelName+";\n";
                     entityGetSet+="    }\n\n";
-                    entityGetSet+="    public void set"+upCamelName+"("+upCamelName+" "+doCamelName+"){\n";
+                    entityGetSet+="    public void set"+upCamelName+"("+upCamelName+entity+" "+doCamelName+"){\n";
                     entityGetSet+="        this."+doCamelName+"="+doCamelName+";\n";
                     entityGetSet+="    }\n\n";
                     break;
                 case ManyToOne:
-                    entityCode+="    private "+"List<"+upCamelName+">  "+doCamelName+"List;\n";
-                    entityGetSet+="    public "+"List<"+upCamelName+"> get"+upCamelName+"List(){\n";
+                    entityCode+="    private "+"List<"+upCamelName+entity+">  "+doCamelName+"List;\n";
+                    entityGetSet+="    public "+"List<"+upCamelName+entity+"> get"+upCamelName+"List(){\n";
                     entityGetSet+="        return "+doCamelName+"List;\n";
                     entityGetSet+="    }\n\n";
-                    entityGetSet+="    public void set"+upCamelName+"List(List<"+upCamelName+"> "+doCamelName+"List){\n";
+                    entityGetSet+="    public void set"+upCamelName+"List(List<"+upCamelName+entity+"> "+doCamelName+"List){\n";
                     entityGetSet+="        this."+doCamelName+"List="+doCamelName+"List;\n";
                     entityGetSet+="    }\n\n";
                     break;
             }
         }
+        if(entityCode.contains("List")){
+            entityCodeHead+="import java.util.List;\n";
+        }
         if(entityGetSet.equals("")){
             return null;
         }else {
-            return entityCodeHead+entityCode+"\n"+entityGetSet+"}\n";
+            return entityCodeHead+"\n"+entityCode+"\n"+entityGetSet+"}\n";
         }
     }
 
@@ -160,17 +169,15 @@ public class Table implements Serializable {
         String primaryKeyType=getPrimaryKey().getJavaType();
         String primaryKeyUpName= Utils.underscoreToCamel(getPrimaryKey().getName(),true);
         String primaryKeyDoName= Utils.underscoreToCamel(getPrimaryKey().getName(),false);
-        String epPackage="import ";
-        String tName=null;
-        if(getEntityCode(project)!=null){
-            tName=upName+"Entity";
-            epPackage+=project.getEntityPackage();
-        }else {
-            tName=upName;
-            epPackage+=project.getPojoPackage();
-        }
         String mapperCode= "package "+ project.getMapperPackage()+";\n\n";
-        mapperCode+=epPackage+"."+tName+";\n";
+        mapperCode+="import io.github.lhcyh.lhmybatis.Example;\n";
+        mapperCode+="import "+project.getPojoPackage()+"."+upName+";\n";
+        String entity="";
+        if(getEntityCode(project)!=null){
+            entity="Entity";
+            mapperCode+="import "+project.getEntityPackage()+"."+upName+"Entity;\n";
+        }
+
         mapperCode+="import java.util.List;\n";
         mapperCode+="import org.apache.ibatis.annotations.Mapper;\n\n";
         mapperCode+="@Mapper\n";
@@ -182,7 +189,7 @@ public class Table implements Serializable {
             if(fieldItem.getIsUnique()){
                 String fUpName= Utils.underscoreToCamel(fieldItem.getName(),true);
                 String fDoName= Utils.underscoreToCamel(fieldItem.getName(),false);
-                mapperCode+="    public "+tName+" get"+upName+"By"+fUpName+"("+fieldItem.getJavaType()+" "+fDoName+");\n";
+                mapperCode+="    public "+upName+entity+" get"+upName+"By"+fUpName+"("+fieldItem.getJavaType()+" "+fDoName+");\n";
             }
         }
         if(foreignKeyList!=null) {
@@ -191,11 +198,11 @@ public class Table implements Serializable {
                     String fUpName = Utils.underscoreToCamel(foreignKeyItem.getFieldName(), true);
                     String fDoName = Utils.underscoreToCamel(foreignKeyItem.getFieldName(), false);
                     Field field = getFieldByName(foreignKeyItem.getFieldName());
-                    mapperCode += "    public List<" + tName + "> get" + upName + "ListBy" + fUpName + "(" + field.getJavaType() + " " + fDoName + ");\n";
+                    mapperCode += "    public List<" + upName+entity + "> get" + upName + "ListBy" + fUpName + "(" + field.getJavaType() + " " + fDoName + ");\n";
                 }
             }
         }
-        mapperCode+="    public List<"+tName+"> get"+upName+"ListByExample(Example<"+upName+"> example);\n";
+        mapperCode+="    public List<"+upName+entity+"> get"+upName+"ListByExample(Example<"+upName+"> example);\n";
         mapperCode+="}\n";
         return mapperCode;
     }
@@ -594,7 +601,7 @@ public class Table implements Serializable {
 
     private String getGetListByExampleXml(Project project,String fill){
         String upName= Utils.underscoreToCamel(name,true);
-        String xml=fill+"<select id=\"get"+upName+"ListByExample\" parameterType=\""+"Example\" "+getResultXml(project)+">\n";
+        String xml=fill+"<select id=\"get"+upName+"ListByExample\" parameterType=\""+"io.github.lhcyh.lhmybatis.Example\" "+getResultXml(project)+">\n";
         xml+=fill+"    select * from `"+name+"`\n";
         xml+=fill+"    <include refid=\"exampleClause\"></include>\n";
         xml+=fill+"</select>\n";

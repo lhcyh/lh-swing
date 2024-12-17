@@ -16,10 +16,10 @@ public class LhCheckBox extends JCheckBox {
         this.updateComponent();
     }
 
-    public void setFontSize(int size){
-        Font font=this.getFont();
-        font.deriveFont(size);
+    public void setFontSize(float size){
+        Font font=this.getFont().deriveFont(size);
         this.setFont(font);
+        updateComponent();
     }
 
     private void updateComponent(){
@@ -27,6 +27,10 @@ public class LhCheckBox extends JCheckBox {
         FontMetrics fontMetrics=sun.font.FontDesignMetrics.getMetrics(font);
         int width=fontMetrics.stringWidth(this.getText());
         int height=fontMetrics.getHeight();
-        this.setSize(width+30+padding,height+padding);
+        this.setSize(width+30+padding,height+padding*2);
+    }
+
+    public void setPadding(Integer padding) {
+        this.padding = padding;
     }
 }

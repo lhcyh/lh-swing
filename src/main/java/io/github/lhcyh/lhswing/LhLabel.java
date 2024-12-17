@@ -39,9 +39,9 @@ public class LhLabel extends JLabel {
         this.updateComponent();
     }
 
-    public void setFontSize(int size){
-        Font font=this.getFont();
-        font.deriveFont(size);
+    public void setFontSize(float size){
+        Font font=this.getFont().deriveFont(size);
         this.setFont(font);
+        updateComponent();
     }
 }

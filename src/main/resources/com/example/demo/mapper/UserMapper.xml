@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.mapper.UserMapper">
     <insert id="addUser" useGeneratedKey="true" keyProperty="id" parameterType="com.example.demo.pojo.User">
-         insert into `user`(account,`password`,`role`) values(#{account},#{password},#{role})
+         insert into `user`(`account`,`password`,`role`) values(#{account},#{password},#{role})
     </insert>
 
     <delete id="deleteUserById">
@@ -13,21 +13,25 @@
         update `user`
         <set>
             <if test="account!=null">
-               account=#{account},
+               `account`=#{account},
             </if>
             <if test="password!=null">
-               password=#{password},
+               `password`=#{password},
             </if>
             <if test="role!=null">
-               role=#{role},
+               `role`=#{role},
             </if>
         </set>
         where id=#{id}
     </update>
 
+    <resultMap id="baseMap" type="com.example.demo.entity.UserEntity">
+        <id property="id" column="id"/>
+        <collection fetchType="lazy" property="websiteList" column="id" select="com.example.demo.mapper.WebsiteMapper.getWebsiteListByUserId"/>
+    </resultMap>
 
-    <select id="getUserById" resultType="com.example.demo.pojo.User" >
-        select * from user where id=#{id}
+    <select id="getUserById" resultMap="baseMap" >
+        select * from `user` where `id`=#{id}
     </select>
 
 
@@ -72,7 +76,7 @@
         </if>
     </sql>
 
-    <select id="getUserListByExample" parameterType="Example"  resultType="com.example.demo.pojo.User" >
+    <select id="getUserListByExample" parameterType="io.github.lhcyh.lhmybatis.Example"  resultMap="baseMap" >
         select * from `user`
         <include refid="exampleClause"></include>
     </select>

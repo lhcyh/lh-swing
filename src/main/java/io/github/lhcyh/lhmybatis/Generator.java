@@ -18,14 +18,23 @@ import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Generator{
+    /** 文字尺寸1 **/
+    private int tSize1=26;
+    /** 文字尺寸2 **/
+    private int tSize2=tSize1-2;
+    /** 文字尺寸3 **/
+    private int tSize3=tSize2-2;
+
     private LhBody lhBody;
     private LhDiv rootDiv;
-    //private LhDiv contentDiv;
     private Connection connection;
     private Profile profile;
+
     public Generator(){
         this.lhBody=new LhBody("代码生成器");
         this.rootDiv=lhBody.getDiv();
@@ -61,36 +70,42 @@ public class Generator{
     private void createConnectPanel(){
         LhDiv contentDiv=new LhDiv();
         contentDiv.setFlexDirection(FlexDirection.COLUMN);
-        //this.contentDiv.setBorder(2,Color.black);
         contentDiv.setJustifyContent(JustifyContent.CENTER);
         contentDiv.setAlignItems(AlignItems.CENTER);
         LhTable lhTable=new LhTable(10);
-        //lhTable.setBorder(2,Color.black);
 
         LhRow row1=lhTable.addRow();
         LhLabel url=new LhLabel("url:");
+        url.setFontSize(tSize3);
         row1.addComponent(url);
         LhInput urlInput=new LhInput();
+        urlInput.setFontSize(tSize3);
         urlInput.setText("jdbc:mysql://localhost:3306/database_name?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai");
         row1.addComponent(urlInput);
 
         LhRow row2=lhTable.addRow();
         LhLabel username=new LhLabel("username:");
+        username.setFontSize(tSize3);
         row2.addComponent(username);
         LhInput usernameInput=new LhInput();
+        usernameInput.setFontSize(tSize3);
         usernameInput.setText("root");
         row2.addComponent(usernameInput);
 
         LhRow row3=lhTable.addRow();
         LhLabel password=new LhLabel("password:");
+        password.setFontSize(tSize3);
         row3.addComponent(password);
         LhInput passwordInput=new LhInput();
+        passwordInput.setFontSize(tSize3);
         row3.addComponent(passwordInput);
 
         LhRow row4=lhTable.addRow();
         LhLabel driverClass=new LhLabel("driverClass:");
+        driverClass.setFontSize(tSize3);
         row4.addComponent(driverClass);
         LhInput driverClassInput=new LhInput();
+        driverClassInput.setFontSize(tSize3);
         driverClassInput.setText("com.mysql.cj.jdbc.Driver");
         row4.addComponent(driverClassInput);
 
@@ -105,6 +120,7 @@ public class Generator{
         }
 
         LhButton button=new LhButton("连接数据库");
+        button.setFontSize(tSize3);
         button.setPadding(20);
         button.addActionListener(new ActionListener() {
             @Override
@@ -156,9 +172,12 @@ public class Generator{
         select.setHeightPercent(0.8f);
 
         LhLabel sTitle=new LhLabel("选择表：");
+        sTitle.setFontSize(tSize1);
         select.add(sTitle);
 
         LhCheckBox allCheck=new LhCheckBox("全选");
+        allCheck.setPadding(50);
+        allCheck.setFontSize(tSize2);
         select.add(allCheck);
 
         LhScrollPane lhScrollPane=new LhScrollPane();
@@ -179,10 +198,20 @@ public class Generator{
             project.setTableList(tableList);
         }
         List<Table> dTableList= Utils.getTableList(this.connection);
+        /** 将保存的表的外键联系赋值给新的表 **/
+        for(Table table:tableList){
+            for(Table dTable:dTableList){
+                if(table.getName().equals(dTable.getName())){
+                    dTable.setForeignKeyList(table.getForeignKeyList());
+                }
+            }
+        }
+
         List<Table> tempTableList=new ArrayList<>();
         List<LhCheckBox> checkBoxList=new ArrayList<>();
         for(Table table:dTableList){
             LhCheckBox cTable=new LhCheckBox(table.getName());
+            cTable.setFontSize(tSize3);
             checkBoxList.add(cTable);
             //cTable.setSelected(true);
             scrDiv.add(cTable);
@@ -196,7 +225,6 @@ public class Generator{
                     }
                 }
             });
-            //cTable.setSelected(true);
             for(Table pTable:tableList){
                 if(pTable.getName().equals(table.getName())){
                     //tempTableList.add(table);
@@ -222,6 +250,7 @@ public class Generator{
         });
 
         LhButton nextButton=new LhButton("下一步");
+        nextButton.setFontSize(tSize3);
         contentDiv.add(nextButton);
         nextButton.addActionListener(new ActionListener() {
             @Override
@@ -494,7 +523,6 @@ public class Generator{
         }
         newRow.addComponent(ckb);
 
-
         if(foreignKey.getReferencedFieldName()!=null){
             ckl.setText(foreignKey.getReferencedFieldName());
         }
@@ -642,6 +670,34 @@ public class Generator{
         //List<ForeignKey> foreignKeyList=this.profile.getProject().getTableList().get(tableIndex).getForeignKeyList();
     }
 
+    private Boolean checkForeignKey(List<ForeignKey> foreignKeyList){
+        Set<String> fSet=new HashSet<>();
+        for(ForeignKey foreignKey:foreignKeyList){
+            if(foreignKey.getFieldName()==null){
+                JOptionPane.showMessageDialog(null,"请选择外键");
+                return false;
+            }
+            if(foreignKey.getReferencedTableName()==null){
+                JOptionPane.showMessageDialog(null,"请选择参考表");
+                return false;
+            }
+            if(foreignKey.getReferencedFieldName()==null){
+                JOptionPane.showMessageDialog(null,"请选择参考列");
+                return false;
+            }
+            if(foreignKey.getAssociate()==null){
+                JOptionPane.showMessageDialog(null,"请选择外键联系");
+                return false;
+            }
+            Boolean tag=fSet.add(foreignKey.getFieldName()+"_" + foreignKey.getReferencedTableName()+"_"+foreignKey.getReferencedFieldName()+"_"+foreignKey.getAssociate());
+            if(!tag){
+                JOptionPane.showMessageDialog(null,"外键联系重复，请删除");
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void createGeneratorInfoPanel(){
         this.rootDiv.removeAll();
         LhDiv contentDiv=new LhDiv();
@@ -695,16 +751,17 @@ public class Generator{
         tContent.add(center);
         center.setPadding(10);
         center.setFlexDirection(FlexDirection.COLUMN);
-        //center.setBorder(2,Color.black);
         center.setWidthPercent(0.4f);
         center.setHeightPercent(1f);
 
         List<Table> tableList=this.profile.getProject().getTableList();
+        List<LhRadio> radioList=new ArrayList<>();
         for(int i=0;i<tableList.size();i++){
             int index=i;
             Table table=tableList.get(i);
             LhRadio tableRadio=new LhRadio(table.getName());
             buttonGroup.add(tableRadio);
+            radioList.add(tableRadio);
             tableRadio.addItemListener(new ItemListener() {
                 @Override
                 public void itemStateChanged(ItemEvent e) {
@@ -771,6 +828,13 @@ public class Generator{
                 if(mapperInput.getText().equals("")){
                     JOptionPane.showMessageDialog(null,"请输入生成mapper路径");
                     return;
+                }
+
+                for(int i=0;i<tableList.size();i++){
+                    if(!checkForeignKey(tableList.get(i).getForeignKeyList())){
+                        radioList.get(i).setSelected(true);
+                        return;
+                    }
                 }
 
                 submitButton.setText("加载中...");
