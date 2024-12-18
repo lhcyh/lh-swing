@@ -16,11 +16,12 @@ public class LhInput extends JTextField {
         FontMetrics fontMetrics=sun.font.FontDesignMetrics.getMetrics(font);
         //int width=fontMetrics.stringWidth(this.getText());
         int height=fontMetrics.getHeight();
-        this.setSize(200,height+padding);
+        this.setSize(this.getWidth(),height+padding);
     }
 
     public void setWidth(Integer width){
         this.setSize(width,this.getHeight());
+        this.updateComponent();
     }
 
     public void setFontSize(float size){

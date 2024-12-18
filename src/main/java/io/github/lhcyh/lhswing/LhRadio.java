@@ -16,10 +16,10 @@ public class LhRadio extends JRadioButton {
         this.updateComponent();
     }
 
-    public void setFontSize(int size){
-        Font font=this.getFont();
-        font.deriveFont(size);
+    public void setFontSize(float size){
+        Font font=this.getFont().deriveFont(size);
         this.setFont(font);
+        this.updateComponent();
     }
 
     private void updateComponent(){

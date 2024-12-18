@@ -110,7 +110,7 @@ public class Utils {
                 throwables.printStackTrace();
             }
             try {
-                System.out.println(resultSet.getString(1));
+//                System.out.println(resultSet.getString(1));
                 //tableList.add(resultSet.getString(1));
                 Table table=new Table();
                 table.setName(resultSet.getString(1));
@@ -151,7 +151,7 @@ public class Utils {
     }
 
     private static Integer getSize(String value){
-        System.out.println("size:"+value);
+//        System.out.println("size:"+value);
         try {
             for(int i=0;i<value.length();i++){
                 char c=value.charAt(i);

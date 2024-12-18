@@ -24,11 +24,11 @@ import java.util.Set;
 
 public class Generator{
     /** 文字尺寸1 **/
-    private int tSize1=26;
+    private int tSize1=27;
     /** 文字尺寸2 **/
-    private int tSize2=tSize1-2;
+    private int tSize2=tSize1-4;
     /** 文字尺寸3 **/
-    private int tSize3=tSize2-2;
+    private int tSize3=tSize2-4;
 
     private LhBody lhBody;
     private LhDiv rootDiv;
@@ -179,7 +179,7 @@ public class Generator{
         select.setWidthPercent(1f);
         select.setHeightPercent(0.8f);
 
-        LhLabel sTitle=new LhLabel("选择表：");
+        LhLabel sTitle=new LhLabel("选择表");
         sTitle.setFontSize(tSize1);
         select.add(sTitle);
 
@@ -305,6 +305,7 @@ public class Generator{
     private void createSelectRTableDialog(Table exTable, List<Table> tableList, ForeignKey foreignKey, LhButton clickButton, LhButton selectRFieldButton){
         LhDialog dialog=new LhDialog(this.lhBody,"选择参考表");
         LhButton confirm=new LhButton("确定");
+        confirm.setFontSize(tSize3);
         LhDiv content=initSelectDialog(dialog,confirm);
 
         Table sTable=new Table();
@@ -314,6 +315,7 @@ public class Generator{
                 continue;
             }
             LhRadio radio=new LhRadio(table.getName());
+            radio.setFontSize(tSize3);
             radio.setPadding(20);
             buttonGroup.add(radio);
             content.add(radio);
@@ -365,6 +367,7 @@ public class Generator{
     private void createSelectFKeyDialog(List<Field> fieldList, ForeignKey foreignKey, LhButton clickButton){
         LhDialog dialog=new LhDialog(this.lhBody,"选择外键");
         LhButton confirm=new LhButton("确定");
+        confirm.setFontSize(tSize3);
         LhDiv content=initSelectDialog(dialog,confirm);
 
         Field sField=new Field();
@@ -374,6 +377,7 @@ public class Generator{
                 continue;
             }
             LhRadio radio=new LhRadio(field.getName());
+            radio.setFontSize(tSize3);
             radio.setPadding(20);
             buttonGroup.add(radio);
             content.add(radio);
@@ -417,6 +421,7 @@ public class Generator{
     private void createSelectRFieldDialog(List<Field> fieldList,ForeignKey foreignKey,LhButton clickButton){
         LhDialog dialog=new LhDialog(this.lhBody,"选择参考列");
         LhButton confirm=new LhButton("确定");
+        confirm.setFontSize(tSize3);
         LhDiv content=initSelectDialog(dialog,confirm);
 
         Field sField=new Field();
@@ -424,6 +429,7 @@ public class Generator{
 
         for(Field field:fieldList){
             LhRadio radio=new LhRadio(field.getName());
+            radio.setFontSize(tSize3);
             radio.setPadding(20);
             buttonGroup.add(radio);
             content.add(radio);
@@ -466,11 +472,13 @@ public class Generator{
     private void createSelectAssociate(ForeignKey foreignKey,LhButton clickButton){
         LhDialog dialog=new LhDialog(this.lhBody,"选择联系");
         LhButton confirm=new LhButton("确定");
+        confirm.setFontSize(tSize3);
         LhDiv content=initSelectDialog(dialog,confirm);
         ForeignKey temp=new ForeignKey();
         ButtonGroup buttonGroup=new ButtonGroup();
         for(ForeignKey.Associate associate: ForeignKey.Associate.values()){
             LhRadio radio=new LhRadio(associate.getValue());
+            radio.setFontSize(tSize3);
             radio.setPadding(20);
             content.add(radio);
             buttonGroup.add(radio);
@@ -508,6 +516,7 @@ public class Generator{
         //tableData.getForeignKeyList().add(foreignKey);
 
         LhButton wj=new LhButton("···");
+        wj.setFontSize(tSize3);
         if(foreignKey.getFieldName()!=null){
             wj.setText(foreignKey.getFieldName());
         }
@@ -522,6 +531,8 @@ public class Generator{
 
         LhButton ckb=new LhButton("···");
         LhButton ckl=new LhButton("···");
+        ckb.setFontSize(tSize3);
+        ckl.setFontSize(tSize3);
         ckl.setEnabled(false);
 
         if(foreignKey.getReferencedTableName()!=null){
@@ -543,6 +554,7 @@ public class Generator{
         });
 
         LhButton lx=new LhButton("···");
+        lx.setFontSize(tSize3);
         if(foreignKey.getAssociate()!=null){
             lx.setText(foreignKey.getAssociate().getValue());
         }
@@ -556,6 +568,7 @@ public class Generator{
         });
 
         LhButton delete=new LhButton("删除");
+        delete.setFontSize(tSize3);
         newRow.addComponent(delete);
 
         delete.addActionListener(new ActionListener() {
@@ -581,9 +594,11 @@ public class Generator{
         parent.add(head);
         head.setAlignItems(AlignItems.CENTER);
         LhLabel tableName=new LhLabel(tableData.getName());
+        tableName.setFontSize(tSize1);
         tableName.setPadding(10);
         head.add(tableName);
         LhButton addButton=new LhButton("+添加外键联系");
+        addButton.setFontSize(tSize3);
         head.add(addButton);
 
         LhScrollPane centerScroll=new LhScrollPane();
@@ -597,17 +612,24 @@ public class Generator{
         table.setAlignItems(AlignItems.CENTER);
         table.setJustifyContent(JustifyContent.CENTER);
         centerScrollDiv.add(table);
+
         LhRow hRow=table.addRow();
-        LhLabel filed=new LhLabel("外键");
-        hRow.addComponent(filed);
-        LhLabel referencedTable=new LhLabel("参考表");
-        hRow.addComponent(referencedTable);
-        LhLabel referencedField=new LhLabel("参考列");
-        hRow.addComponent(referencedField);
-        LhLabel associate=new LhLabel("联系");
-        hRow.addComponent(associate);
-        LhLabel operate=new LhLabel("操作");
-        hRow.addComponent(operate);
+        String[] titles={"外键","参考表","参考列","联系","操作"};
+        for(int i=0;i<titles.length;i++){
+            LhLabel title=new LhLabel(titles[i]);
+            title.setFontSize(tSize2);
+            hRow.addComponent(title);
+        }
+//        LhLabel filed=new LhLabel("外键");
+//        hRow.addComponent(filed);
+//        LhLabel referencedTable=new LhLabel("参考表");
+//        hRow.addComponent(referencedTable);
+//        LhLabel referencedField=new LhLabel("参考列");
+//        hRow.addComponent(referencedField);
+//        LhLabel associate=new LhLabel("联系");
+//        hRow.addComponent(associate);
+//        LhLabel operate=new LhLabel("操作");
+//        hRow.addComponent(operate);
 
         for(ForeignKey foreignKey:tableData.getForeignKeyList()){
             addRowByForeignKey(foreignKey,table,tableData,tableList);
@@ -708,7 +730,7 @@ public class Generator{
     private void createGeneratorInfoPanel(){
         this.rootDiv.removeAll();
         LhDiv contentDiv=new LhDiv();
-        contentDiv.setBorder(2,Color.black);
+        //contentDiv.setBorder(2,Color.black);
         this.rootDiv.add(contentDiv);
         contentDiv.setWidthPercent(0.9f);
         contentDiv.setHeightPercent(1f);
@@ -728,7 +750,9 @@ public class Generator{
         bContent.setJustifyContent(JustifyContent.SPACE_AROUND);
 
         LhButton lastButton=new LhButton("上一步");
+        lastButton.setFontSize(tSize3);
         LhButton submitButton=new LhButton("提交");
+        submitButton.setFontSize(tSize3);
         bContent.add(lastButton);
         bContent.add(submitButton);
 
@@ -767,6 +791,7 @@ public class Generator{
             int index=i;
             Table table=tableList.get(i);
             LhRadio tableRadio=new LhRadio(table.getName());
+            tableRadio.setFontSize(tSize3);
             buttonGroup.add(tableRadio);
             radioList.add(tableRadio);
             tableRadio.addItemListener(new ItemListener() {
@@ -793,49 +818,83 @@ public class Generator{
         right.setWidthPercent(0.25f);
         right.setHeightPercent(0.9f);
 
-        LhLabel pojo=new LhLabel("生成model的路径");
-        right.add(pojo);
-        LhInput pojoInput=new LhInput();
-        pojoInput.setText("com.example.demo.pojo");
-        right.add(pojoInput);
-
-        LhLabel entity=new LhLabel("生成entity的路径");
-        right.add(entity);
-        LhInput entityInput=new LhInput();
-        entityInput.setText("com.example.demo.entity");
-        right.add(entityInput);
-
-        LhLabel mapper=new LhLabel("生成mapper接口的路径");
-        right.add(mapper);
-        LhInput mapperInput=new LhInput();
-        mapperInput.setText("com.example.demo.mapper");
-        right.add(mapperInput);
-
+        String[] titles={"生成model的路径","生成entity的路径","生成mapper接口的路径"};
+        String[] paths={"com.example.demo.pojo","com.example.demo.entity","com.example.demo.mapper"};
         String pojoPackage=profile.getProject().getPojoPackage();
         String entityPackage=profile.getProject().getEntityPackage();
         String mapperPackage=profile.getProject().getMapperPackage();
         if(pojoPackage!=null)
-            pojoInput.setText(pojoPackage);
+            paths[0]=pojoPackage;
         if(entityPackage!=null)
-            entityInput.setText(entityPackage);
+            paths[1]=entityPackage;
         if(mapperPackage!=null)
-            mapperInput.setText(mapperPackage);
+            paths[2]=mapperPackage;
+
+        LhInput[] inputs=new LhInput[3];
+        for(int i=0;i<titles.length;i++){
+            LhDiv item=new LhDiv();
+            item.setFlexDirection(FlexDirection.COLUMN);
+            item.setPadding(5);
+            LhLabel title=new LhLabel(titles[i]);
+            title.setFontSize(tSize3);
+            item.add(title);
+            LhInput input=new LhInput();
+            input.setWidth(250);
+            input.setFontSize(tSize3);
+            input.setText(paths[i]);
+            item.add(input);
+            right.add(item);
+            inputs[i]=input;
+        }
+
+
+//        LhDiv item2=new LhDiv();
+//        item2.setPadding(5);
+//        LhLabel entity=new LhLabel("生成entity的路径");
+//        item2.add(entity);
+//        LhInput entityInput=new LhInput();
+//        entityInput.setText("com.example.demo.entity");
+//        item2.add(entityInput);
+//
+//        LhDiv item3=new LhDiv();
+//        item3.setPadding(5);
+//        LhLabel mapper=new LhLabel("生成mapper接口的路径");
+//        item3.add(mapper);
+//        LhInput mapperInput=new LhInput();
+//        mapperInput.setText("com.example.demo.mapper");
+//        item3.add(mapperInput);
+//
+//        right.add(item1);
+//        right.add(item2);
+//        right.add(item3);
+//
+//        String pojoPackage=profile.getProject().getPojoPackage();
+//        String entityPackage=profile.getProject().getEntityPackage();
+//        String mapperPackage=profile.getProject().getMapperPackage();
+//        if(pojoPackage!=null)
+//            pojoInput.setText(pojoPackage);
+//        if(entityPackage!=null)
+//            entityInput.setText(entityPackage);
+//        if(mapperPackage!=null)
+//            mapperInput.setText(mapperPackage);
 
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(pojoInput.getText().equals("")){
-                    JOptionPane.showMessageDialog(null,"请输入生成model路径");
-                    return;
+                for(int i=0;i< titles.length;i++) {
+                    if (inputs[i].getText().equals("")) {
+                        JOptionPane.showMessageDialog(null, "请输入"+titles[i]);
+                        return;
+                    }
                 }
-                if(entityInput.getText().equals("")){
-                    JOptionPane.showMessageDialog(null,"请输入生成entity路径");
-                    return;
-                }
-                if(mapperInput.getText().equals("")){
-                    JOptionPane.showMessageDialog(null,"请输入生成mapper路径");
-                    return;
-                }
+//                if(entityInput.getText().equals("")){
+//                    JOptionPane.showMessageDialog(null,"请输入生成entity路径");
+//                    return;
+//                }
+//                if(mapperInput.getText().equals("")){
+//                    JOptionPane.showMessageDialog(null,"请输入生成mapper路径");
+//                    return;
+//                }
 
                 for(int i=0;i<tableList.size();i++){
                     if(!checkForeignKey(tableList.get(i).getForeignKeyList())){
@@ -847,9 +906,9 @@ public class Generator{
                 submitButton.setText("加载中...");
                 submitButton.setEnabled(false);
 
-                profile.getProject().setPojoPackage(pojoInput.getText());
-                profile.getProject().setEntityPackage(entityInput.getText());
-                profile.getProject().setMapperPackage(mapperInput.getText());
+                profile.getProject().setPojoPackage(inputs[0].getText());
+                profile.getProject().setEntityPackage(inputs[1].getText());
+                profile.getProject().setMapperPackage(inputs[2].getText());
                 setProfile(profile);
 
                 MybatisFactory mybatisFactory=new MybatisFactory(profile.getProject());
