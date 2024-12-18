@@ -1,6 +1,5 @@
 package lhuitest;
 
-import io.github.lhcyh.lhmybatis.Generator;
 import io.github.lhcyh.lhswing.LhBody;
 import io.github.lhcyh.lhswing.LhDiv;
 import io.github.lhcyh.lhswing.LhScrollPane;
@@ -12,13 +11,10 @@ import io.github.lhcyh.lhswing.LhScrollPane;
  */
 public class Test {
     public static void main(String[] args) {
-        testGenerator();
+
         //test1();
     }
 
-    private static void testGenerator(){
-        new Generator();
-    }
 
     private static void test1(){
         LhBody lhBody=new LhBody("测试");
