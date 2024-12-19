@@ -3,11 +3,6 @@ package io.github.lhcyh.lhswing;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * @ClassName：LhLabel
- * @Author：lh
- * @Date：2024/12/3 16:29
- */
 public class LhLabel extends JLabel {
     private int padding=0;
     public LhLabel(String text){

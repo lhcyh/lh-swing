@@ -6,11 +6,6 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-/**
- * @ClassName：PercentPanel
- * @Author：lh
- * @Date：2024/12/4 15:47
- */
 public class PercentPanel extends JPanel {
     private ComponentAdapter pWidthListen;
     private ComponentAdapter pHeightListen;

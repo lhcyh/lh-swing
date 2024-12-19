@@ -8,11 +8,6 @@ import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @ClassName：LhTable
- * @Author：lh
- * @Date：2024/12/4 16:18
- */
 public class LhTable extends LhDiv {
     private List<LhRow> rowList=new ArrayList<>();
     private Integer padding=2;

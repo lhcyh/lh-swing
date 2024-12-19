@@ -7,11 +7,6 @@ import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @ClassName：LhRow
- * @Author：lh
- * @Date：2024/12/4 17:04
- */
 public class LhRow extends LhDiv{
     private List<LhDiv> cellList=new ArrayList<>();
     private Integer padding;

@@ -3,11 +3,6 @@ package io.github.lhcyh.lhswing;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * @ClassName：LhRadio
- * @Author：lh
- * @Date：2024/12/6 16:38
- */
 public class LhRadio extends JRadioButton {
     private Integer padding=5;
 

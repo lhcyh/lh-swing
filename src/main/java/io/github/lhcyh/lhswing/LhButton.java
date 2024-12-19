@@ -4,11 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-/**
- * @ClassName：LhButton
- * @Author：lh
- * @Date：2024/12/3 12:47
- */
 public class LhButton extends JButton {
     private int padding=10;
 
