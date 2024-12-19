@@ -5,11 +5,6 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-/**
- * @ClassName：Body
- * @Author：lh
- * @Date：2024/12/3 11:17
- */
 public class LhBody extends JFrame {
     private LhDiv lhDiv;
 

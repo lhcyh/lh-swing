@@ -3,11 +3,6 @@ package io.github.lhcyh.lhswing;
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * @ClassName：LhRadio
- * @Author：lh
- * @Date：2024/12/6 15:11
- */
 public class LhCheckBox extends JCheckBox {
     private Integer padding=5;
 

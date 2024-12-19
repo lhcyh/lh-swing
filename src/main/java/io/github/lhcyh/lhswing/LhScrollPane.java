@@ -5,11 +5,6 @@ import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-/**
- * @ClassName：LhScrollPane
- * @Author：lh
- * @Date：2024/12/3 17:25
- */
 public class LhScrollPane extends JScrollPane {
     private LhDiv lhDiv;
     private ComponentAdapter pWidthListen;

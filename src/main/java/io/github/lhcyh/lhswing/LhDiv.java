@@ -8,11 +8,6 @@ import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @ClassName：LhDiv
- * @Author：lh
- * @Date：2024/12/3 11:50
- */
 public class LhDiv extends PercentPanel {
     private List<Component> componentList=new ArrayList<>();
     private Integer padding=0;

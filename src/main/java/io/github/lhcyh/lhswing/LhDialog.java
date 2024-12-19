@@ -4,11 +4,6 @@ import javax.swing.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-/**
- * @ClassName：DivDialog
- * @Author：lh
- * @Date：2024/12/3 10:17
- */
 public class LhDialog extends JDialog {
     private LhDiv lhDiv;
     public LhDialog(JFrame jFrame,String title){
